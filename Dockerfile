@@ -17,15 +17,18 @@ EXPOSE $SSL_PORT
 
 WORKDIR /app
 
-ADD . .
-
 RUN apk update \
 && apk add build-base zlib-dev tzdata nodejs yarn openssl-dev \
-&& rm -rf /var/cache/apk/* \
-&& gem install bundler \
+&& rm -rf /var/cache/apk/*
+
+COPY Gemfile Gemfile.lock ./
+
+RUN gem install bundler \
 && bundle config --local build.sassc --disable-march-tune-native \
-&& bundle install --without development test \
-&& bundle exec rake assets:precompile \
+&& bundle install --without development test
+
+COPY . .
+RUN bundle exec rake assets:precompile \
 && addgroup -S app && adduser -S app -G app -h /app \
 && chown -R app.app /app \
 && chown -R app.app /usr/local/bundle \
