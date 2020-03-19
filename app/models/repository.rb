@@ -10,9 +10,9 @@ class Repository < Resource
     Collection.new entries: entries, more: response.headers.has_key?("Link")
   end
 
-  def self.find(name)
+  def self.find(name, count: 500, last: nil)
     begin
-      response = client.get "/v2/#{name}/tags/list"
+      response = client.get "/v2/#{name}/tags/list", { n: count, last: last }.compact
       tags     = response.body["tags"]
     rescue Faraday::ResourceNotFound => e
       tags = nil
